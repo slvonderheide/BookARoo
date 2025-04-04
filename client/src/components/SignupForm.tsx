@@ -5,15 +5,19 @@ import { Form, Button, Alert } from 'react-bootstrap';
 import { createUser } from '../utils/API';
 import Auth from '../utils/auth';
 import type { User } from '../models/User';
+import { ADD_USER } from '../utils/mutations';
+import { useMutation } from '@apollo/client';
 
-// biome-ignore lint/correctness/noEmptyPattern: <explanation>
-const SignupForm = ({}: { handleModalClose: () => void }) => {
-  // set initial form state
-  const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', password: '', savedBooks: [] });
-  // set state for form validation
+const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
+  // Set initial form state
+  const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '' });
+  // Set state for form validation
   const [validated] = useState(false);
-  // set state for alert
+  // Set state for alert
   const [showAlert, setShowAlert] = useState(false);
+
+  // Define the addUser mutation
+  const [addUser, { error }] = useMutation(ADD_USER);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -23,7 +27,6 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
@@ -31,33 +34,24 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
     }
 
     try {
-      const response = await createUser(userFormData);
+      const { data } = await addUser({
+        variables: { ...userFormData },
+      });
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      const { token } = await response.json();
-      Auth.login(token);
+      Auth.login(data.addUser.token);
+      handleModalClose(); // Close modal after successful signup
     } catch (err) {
       console.error(err);
       setShowAlert(true);
     }
 
-    setUserFormData({
-      username: '',
-      email: '',
-      password: '',
-      savedBooks: [],
-    });
+    setUserFormData({ username: '', email: '', password: '' });
   };
 
   return (
     <>
-      {/* This is needed for the validation functionality above */}
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        {/* show alert if server response is bad */}
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
+        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert || !!error} variant='danger'>
           Something went wrong with your signup!
         </Alert>
 
@@ -68,7 +62,7 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
             placeholder='Your username'
             name='username'
             onChange={handleInputChange}
-            value={userFormData.username || ''}
+            value={userFormData.username}
             required
           />
           <Form.Control.Feedback type='invalid'>Username is required!</Form.Control.Feedback>
@@ -81,7 +75,7 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
             placeholder='Your email address'
             name='email'
             onChange={handleInputChange}
-            value={userFormData.email || ''}
+            value={userFormData.email}
             required
           />
           <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
@@ -94,15 +88,13 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
             placeholder='Your password'
             name='password'
             onChange={handleInputChange}
-            value={userFormData.password || ''}
+            value={userFormData.password}
             required
           />
           <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
         </Form.Group>
-        <Button
-          disabled={!(userFormData.username && userFormData.email && userFormData.password)}
-          type='submit'
-          variant='success'>
+
+        <Button disabled={!(userFormData.username && userFormData.email && userFormData.password)} type='submit' variant='success'>
           Submit
         </Button>
       </Form>
