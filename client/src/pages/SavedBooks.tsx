@@ -4,7 +4,7 @@ import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_ME } from '../utils/queries'; // Fix: Import correct query
-import { REMOVE_BOOK } from '../utils/mutations';
+import { DELETE_BOOK } from '../utils/mutations';
 
 const SavedBooks = () => {
   // Fetch user data
@@ -12,11 +12,11 @@ const SavedBooks = () => {
   const userData = data?.me || { savedBooks: [] };
 
   // Define the removeBook mutation
-  const [removeBook] = useMutation(REMOVE_BOOK, {
-    update(cache, { data: { removeBook } }) {
+  const [deleteBook] = useMutation(DELETE_BOOK, {
+    update(cache, { data: { deleteBook } }) {
       cache.writeQuery({
         query: GET_ME, // Fix: Ensure correct query is updated
-        data: { me: removeBook },
+        data: { me: deleteBook },
       });
     },
   });
@@ -26,7 +26,7 @@ const SavedBooks = () => {
     if (!Auth.loggedIn()) return false;
 
     try {
-      await removeBook({
+      await deleteBook({
         variables: { bookId },
       });
 
