@@ -12,7 +12,7 @@ router.use('/api', apiRoutes);
 
 // serve up react front-end in production modify this sever to look like the mini project
 router.use((_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../../client/build/index.html'));
+  res.sendFile(path.join(__dirname, '../../../client/dist/index.html'));
 });
 
 export default router;

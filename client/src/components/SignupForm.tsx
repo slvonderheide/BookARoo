@@ -12,7 +12,7 @@ const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
   // Set initial form state
   const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '' });
   // Set state for form validation
-  const [validated] = useState(false);
+  const [validated, setValidated] = useState(false);
   // Set state for alert
   const [showAlert, setShowAlert] = useState(false);
 
@@ -24,29 +24,37 @@ const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
     setUserFormData({ ...userFormData, [name]: value });
   };
 
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+ const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
 
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
+  const form = event.currentTarget;
+  if (form.checkValidity() === false) {
+    event.stopPropagation();
+    setValidated(true);
+    return;
+  }
+
+  setValidated(true);
+
+  try {
+    // ✅ Use RESTful API instead of GraphQL
+    const response = await createUser(userFormData as User);
+    if (!response.ok) {
+      throw new Error('Failed to create user');
     }
 
-    try {
-      const { data } = await addUser({
-        variables: { ...userFormData },
-      });
+    const { token } = await response.json();
+    Auth.login(token);
+    handleModalClose();
+    setShowAlert(false);
+  } catch (err) {
+    console.error('Signup error:', err);
+    setShowAlert(true);
+  }
 
-      Auth.login(data.addUser.token);
-      handleModalClose(); // Close modal after successful signup
-    } catch (err) {
-      console.error(err);
-      setShowAlert(true);
-    }
+  setUserFormData({ username: '', email: '', password: '' });
+};
 
-    setUserFormData({ username: '', email: '', password: '' });
-  };
 
   return (
     <>
