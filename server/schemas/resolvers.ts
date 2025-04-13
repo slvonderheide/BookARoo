@@ -1,4 +1,4 @@
-import { User } from '../';
+import { User } from '../../client/src/models/User';
 import signToken from '../../client/src/utils/auth.js';
 import { AuthenticationError } from 'apollo-server-express';
 import { saveBook, deleteBook } from '../dist/controllers/user-controller.js';
@@ -45,7 +45,7 @@ const resolvers = {
   Mutation: {
     addUser: async (_parent: any, { input }: AddUserArgs) => {
       const user = await User.create({ ...input });
-      const token = signToken(user.username, user.email, user._id);
+      const token = signToken({ username: user.username, email: user.email, id: user._id });
       return { token, user };
     },
 
@@ -56,7 +56,7 @@ const resolvers = {
         throw new AuthenticationError('Incorrect credentials');
       }
 
-      const token = signToken(user.username, user.email, user._id);
+      const token = signToken({ username: user.username, email: user.email, id: user._id });
       return { token, user };
     },
 
