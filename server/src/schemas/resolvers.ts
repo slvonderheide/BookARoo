@@ -1,7 +1,7 @@
-import { User } from '../../client/src/models/User';
-import signToken from '../../client/src/utils/auth.js';
+import { User } from '../../../client/src/models/User';
+import signToken from '../../../client/src/utils/auth.js';
 import { AuthenticationError } from 'apollo-server-express';
-import { saveBook, deleteBook } from '../dist/controllers/user-controller.js';
+import { saveBook, deleteBook } from '../../dist/controllers/user-controller.js';
 
 // Argument types
 interface SaveBookArgs {
