@@ -2,9 +2,9 @@ import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 
-import { createUser } from '../utils/API';
-import Auth from '../utils/auth';
-import type { User } from '../models/User';
+// import { createUser } from '../utils/API';
+// import Auth from '../utils/auth';
+// import type { User } from '../models/User';
 import { ADD_USER } from '../utils/mutations';
 import { useMutation } from '@apollo/client';
 
@@ -17,7 +17,10 @@ const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
   const [showAlert, setShowAlert] = useState(false);
 
   // Define the addUser mutation
-  const [addUser, { error }] = useMutation(ADD_USER);
+  const [addUser, { error:addUserError }] = useMutation(ADD_USER);
+  if (addUserError) {
+    console.log(JSON.stringify(addUserError, null, 2));
+  }
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -37,14 +40,14 @@ const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
   setValidated(true);
 
   try {
-    // ✅ Use RESTful API instead of GraphQL
-    const response = await createUser(userFormData as User);
-    if (!response.ok) {
-      throw new Error('Failed to create user');
-    }
-
-    const { token } = await response.json();
-    Auth.login(token);
+    
+    const response = await addUser({ variables: userFormData });
+    // if (!response.ok) {
+    //   throw new Error('Failed to create user');
+    // }
+console.log('User created successfully:', response);
+    // const { token } = await response.json();
+    // Auth.login(token);
     handleModalClose();
     setShowAlert(false);
   } catch (err) {
@@ -59,7 +62,7 @@ const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
   return (
     <>
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert || !!error} variant='danger'>
+        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert || !!addUserError} variant='danger'>
           Something went wrong with your signup!
         </Alert>
 

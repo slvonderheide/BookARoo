@@ -4,14 +4,16 @@ import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_ME } from '../utils/queries';
-import { DELETE_BOOK, SAVE_BOOK } from '../utils/mutations';
+import { DELETE_BOOK } from '../utils/mutations';
+//import { DELETE_BOOK, SAVE_BOOK } from '../utils/mutations';
 
 const SavedBooks = () => {
-  const { loading, data } = useQuery(GET_ME);
+  const { data } = useQuery(GET_ME);
+  //const { loading, data } = useQuery(GET_ME);
   const userData = data?.me || { savedBooks: [] };
 
   // Save book mutation
-  const [saveBook] = useMutation(SAVE_BOOK);
+ // const [saveBook] = useMutation(SAVE_BOOK);
 
   // Delete book mutation
   const [deleteBook] = useMutation(DELETE_BOOK);
@@ -32,36 +34,36 @@ const SavedBooks = () => {
   };
 
   // OPTIONAL: Function to handle saving a book (e.g. triggered somewhere else)
-  const handleSaveBook = async (bookId: string) => {
-    const bookToSave = userData.savedBooks.find((book) => book.bookId === bookId);
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
-    if (!token || !bookToSave) return false;
+  // const handleSaveBook = async (bookId: string) => {
+  //   const bookToSave = userData.savedBooks.find((book) => book.bookId === bookId);
+  //   const token = Auth.loggedIn() ? Auth.getToken() : null;
+  //   if (!token || !bookToSave) return false;
   
-    try {
-      const { title, authors, description, image, link } = bookToSave;
+  //   try {
+  //     const { title, authors, description, image, link } = bookToSave;
   
-      const { data } = await saveBook({
-        variables: {
-          bookId,
-          title,
-          authors,
-          description,
-          image,
-          link
-        }
-      });
+  //     const { data } = await saveBook({
+  //       variables: {
+  //         bookId,
+  //         title,
+  //         authors,
+  //         description,
+  //         image,
+  //         link
+  //       }
+  //     });
   
-      console.log('Book saved!', data);
-    } catch (err: any) {
-      console.error('GraphQL error:', err.message);
-      if (err.graphQLErrors) console.error('GraphQL Errors:', err.graphQLErrors);
-      if (err.networkError) console.error('Network Error:', err.networkError);
-    }
-  };
+  //     console.log('Book saved!', data);
+  //   } catch (err: any) {
+  //     console.error('GraphQL error:', err.message);
+  //     if (err.graphQLErrors) console.error('GraphQL Errors:', err.graphQLErrors);
+  //     if (err.networkError) console.error('Network Error:', err.networkError);
+  //   }
+  // };
 
-  if (loading) {
-    return <h2>LOADING...</h2>;
-  }
+  // if (loading) {
+  //   return <h2>LOADING...</h2>;
+  // }
 
   return (
     <>
